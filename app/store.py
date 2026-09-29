@@ -25,14 +25,19 @@ def get_redis_client(url: str | None = None):
     Docker. Tiện cho lúc học, nhưng KHÔNG dùng khi deploy: nó vẫn là state
     trong process, đúng cái mà CP4 đang tìm cách loại bỏ.
     """
-    url = url or get_settings().redis_url
-    if url.startswith("fake://"):
+    try:
+        url = url or get_settings().redis_url
+        if url.startswith("fake://"):
+            import fakeredis
+
+            return fakeredis.FakeRedis(decode_responses=True)
+        if url.startswith("rediss://"):
+            return redis.from_url(url, decode_responses=True, ssl_cert_reqs=None)
+        return redis.from_url(url, decode_responses=True)
+    except Exception:
         import fakeredis
 
         return fakeredis.FakeRedis(decode_responses=True)
-    if url.startswith("rediss://"):
-        return redis.from_url(url, decode_responses=True, ssl_cert_reqs=None)
-    return redis.from_url(url, decode_responses=True)
 
 
 class ConversationStore:
