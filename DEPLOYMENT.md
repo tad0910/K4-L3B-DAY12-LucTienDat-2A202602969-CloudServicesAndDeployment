@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-L3B-DAY12-HoVaTen-MSSV-CloudServicesAndDeployment) |
+| Họ và tên | Lục Tiến Đạt |
+| Mã học viên | 2A202602969 |
+| Repo | https://github.com/tad0910/K4-L3B-DAY12-LucTienDat-2A202602969-CloudServicesAndDeployment |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://k4-l3b-day12-luctiendat-2a202602969.onrender.com |
+| Platform | Render |
+| Ngày deploy | 2026-09-29 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -30,7 +30,7 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
 | `AGENT_API_KEY` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `REDIS_URL` | ✅ | Render Key Value add-on |
 | `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
 | `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
 | `LOG_LEVEL` | ✅ | INFO |
@@ -41,18 +41,18 @@ Thay `<URL>` bằng Public URL ở trên:
 
 ```bash
 # 1. Liveness — mong đợi 200 {"status":"ok"}
-curl -i <URL>/health
+curl -i https://k4-l3b-day12-luctiendat-2a202602969.onrender.com/health
 
 # 2. Readiness — mong đợi 200 {"status":"ready"} (đã nối được Redis)
-curl -i <URL>/ready
+curl -i https://k4-l3b-day12-luctiendat-2a202602969.onrender.com/ready
 
 # 3. Không có API key — mong đợi 401
-curl -i -X POST <URL>/ask \
+curl -i -X POST https://k4-l3b-day12-luctiendat-2a202602969.onrender.com/ask \
   -H "Content-Type: application/json" \
   -d '{"question":"Hello"}'
 
 # 4. Có API key — mong đợi 200 kèm câu trả lời
-curl -i -X POST <URL>/ask \
+curl -i -X POST https://k4-l3b-day12-luctiendat-2a202602969.onrender.com/ask \
   -H "Content-Type: application/json" \
   -H "X-API-Key: $AGENT_API_KEY" \
   -H "X-User-Id: sv-test" \
@@ -60,7 +60,7 @@ curl -i -X POST <URL>/ask \
 
 # 5. Rate limit — gọi 15 lần, những lần cuối phải trả 429
 for i in $(seq 1 15); do
-  curl -s -o /dev/null -w "%{http_code} " -X POST <URL>/ask \
+  curl -s -o /dev/null -w "%{http_code} " -X POST https://k4-l3b-day12-luctiendat-2a202602969.onrender.com/ask \
     -H "Content-Type: application/json" \
     -H "X-API-Key: $AGENT_API_KEY" \
     -H "X-User-Id: sv-test" \
@@ -73,7 +73,68 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+#1
+HTTP/1.1 200 OK
+Date: Tue, 29 Sep 2026 02:48:12 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+cf-cache-status: DYNAMIC
+rndr-id: 1e130361-33f6-4b79
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+CF-RAY: a427aae2381285d5-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"status":"ok","service":"day12-agent","version":"1.0.0"}
+
+#2 
+HTTP/1.1 200 OK
+Date: Tue, 29 Sep 2026 02:49:02 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+rndr-id: 1f71b37c-ce82-459c
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+cf-cache-status: DYNAMIC
+CF-RAY: a427ac1b592eddc9-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"status":"ready","redis":true}
+
+#3
+HTTP/1.1 401 Unauthorized
+Date: Tue, 29 Sep 2026 02:54:40 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+cf-cache-status: DYNAMIC
+rndr-id: 35953245-ae7c-4451
+Server: cloudflare
+x-render-origin-server: uvicorn
+{"detail":"invalid or missing API key"}
+
+#4
+HTTP/1.1 200 OK
+Date: Tue, 29 Sep 2026 03:00:39 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+cf-cache-status: DYNAMIC
+rndr-id: f05e4d60-a59c-4562
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+CF-RAY: a427bd233b3fdd46-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"answer":"Câu hỏi hay. Deploy là gì thường được giải quyết bằng cách chuẩn hóa môi trường chạy: cùng một image chạy giống nhau ở laptop và trên cloud.","user_id":"sv-test","history_length":0,"cost_usd":2.145e-05,"tokens":{"in":3,"out":35}}
+
+#5
+200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
 ```
 
 ## Ảnh Chụp Màn Hình
