@@ -23,7 +23,7 @@ services:
         fromService:
           name: day12-redis
           type: redis
-          property: connectionString
+          property: internalConnectionString
 
   - type: redis
     name: day12-redis
